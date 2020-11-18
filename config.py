@@ -51,21 +51,6 @@ class DockerConfig(DevelopmentConfig):
     SESSION_TYPE = 'redis'
     SESSION_REDIS = redis.Redis("redis")
 
-    # amazon S3
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', "")
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', "")
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', "")
-
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-
-    # static files
-    STATIC_LOCATION = 'static'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
-
-    # public files
-    PUBLIC_UPLOAD_LOCATION = 'upload'
-    UPLOAD_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_UPLOAD_LOCATION}/'
-
     # private files
     PRIVATE_UPLOAD_LOCATION = 'prviate'
 
@@ -81,12 +66,29 @@ class HerokuConfig(Config):
     CACHE_MEMCACHED_SERVERS = os.environ.get("MEMCACHIER_SERVERS", "").split(',')
     CACHE_MEMCACHED_USERNAME = os.environ.get('MEMCACHIER_USERNAME')
     CACHE_MEMCACHED_PASSWORD = os.environ.get('MEMCACHIER_PASSWORD')
+    CACHE_OPTIONS = {
+        'behaviors': {
+            # Faster IO
+            'tcp_nodelay': True,
+            # Keep connection alive
+            'tcp_keepalive': True,
+            # Timeout for set/get requests
+            'connect_timeout': 2000, # ms
+            'send_timeout': 750 * 1000, # us
+            'receive_timeout': 750 * 1000, # us
+            '_poll_timeout': 2000, # ms
+            # Better failover
+            'ketama': True,
+            'remove_failed': 1,
+            'retry_timeout': 2,
+            'dead_timeout': 30
+        }
+    }
 
     # redis
+    SESSION_TYPE = 'redis'
     REDIS_URL = os.environ.get("REDIS_URL")
-
-    # rabbitmq
-    AMQP_URL = os.environ.get("CLOUDAMQP_URL")
+    SESSION_REDIS = redis.Redis(REDIS_URL)
 
 
 config = {

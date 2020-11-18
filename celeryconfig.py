@@ -15,8 +15,14 @@ class DockerConfig(Config):
     result_backend = 'redis://redis:6379'
 
 
+class HerokuConfig(Config):
+    broker_url = os.environ.get("CLOUDAMQP_URL")
+    result_backend = os.environ.get("REDIS_URL")
+
+
 celeryconfig = {
     "docker": DockerConfig,
+    "heroku": HerokuConfig,
 
     "default": Config
 }
