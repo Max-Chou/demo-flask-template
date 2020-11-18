@@ -88,7 +88,7 @@ class HerokuConfig(Config):
     # redis
     SESSION_TYPE = 'redis'
     REDIS_URL = os.environ.get("REDIS_URL")
-    SESSION_REDIS = redis.Redis(REDIS_URL)
+    SESSION_REDIS = redis.Redis.from_url(REDIS_URL)
 
 
 config = {
