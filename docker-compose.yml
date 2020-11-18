@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  
+  app:
+    build: .
+    image: myapp:0.0.1
+    ports:
+      - 5000:5000
+    env_file: 
+      - .env
+    command: gunicorn -b :5000 --access-logfile - --error-logfile - manage:app
+
+    depends_on:
+      - postgres
+      - redis
+      - memcached
+
+
+  celery:
+    build: .
+    image: myapp:0.0.1
+    env_file:
+      - .env
+    command: celery worker -l info -A app.tasks
+    depends_on:
+      - redis
+      - rabbitmq
+
+
+  redis:
+    image: redis:6.0.9
+
+
+  postgres:
+    image: postgres:12.2
+    env_file:
+      - .env
+
+
+  memcached:
+    image: memcached:1.6.8
+  
+
+  rabbitmq:
+    image: rabbitmq:3.8.9
